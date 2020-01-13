@@ -3,10 +3,6 @@
     (org.apache.lucene.search IndexSearcher Query))
   (:gen-class))
 
-(defn- directory-reader
-  [path]
-  (DirectoryReader/open (path)))
-
-(defn run [opt]
-  (println (str "opt: " opt)))
+(defn run [opt arg err]
+  (println (str "opt: " opt " \narg: " arg " \nerr: " err)))
 

@@ -6,16 +6,14 @@
     [clojure.java.io :as io]
     [clojure.tools.cli :as cli]))
 
-(defn- usage [options-summary]
-  (->> ["This is Oraqus' IndexR, use it to index your books"
-        ""
+(defn- usage [options-summary] (->> ["This is Oraqus' IndexR, use it to index your books" ""
         "Usage: program-name -i /path/to/index -q someTerm"
         "Options:"
         options-summary]
         (string/join \newline)))
 
 (defn- error-msg [errors]
-  (str "something went wrong while processing the options" (string/join \newline errors)))
+  (str "Something failed while processings the options " (string/join \newline errors)))
 
 (defn- exit [status msg]
   (println msg)
@@ -26,7 +24,7 @@
    ["-i" "--index INDEX" "Path to index"
     :default ".index/"
     ;:parse-fn #(somefn %)
-    :validate [#((.isDirectory (io/file %))) "must be a directory"]]
+    :validate [#(.isDirectory (io/file %)) "must be a directory"]]
 
    ["-q" "--query PATTERN" "The search query"
     :default "*"
@@ -40,9 +38,8 @@
       errors (exit 1 (error-msg errors))
       :else
       (try
-           (app/run options)
-           (catch Exception e
-             (.printStackTrace e)
-             (println "Danger Will Robinson! " (.getMessage e))
-             (exit 1 (usage summary)))))))
+        (app/run options arguments errors)
+        (catch Exception e
+          (println "Danger:" (.getMessage e))
+          (exit 1 (usage summary)))))))
 
