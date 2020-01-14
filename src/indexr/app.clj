@@ -1,5 +1,8 @@
 (ns indexr.app
   (:import
+    (org.apache.lucene.analysis Analyzer)
+    (org.apache.lucene.analysis.standard StandardAnalyzer)
+    (org.apache.lucene.document Document Field StringField TextField)
     (org.apache.lucene.search IndexSearcher Query))
   (:gen-class))
 
@@ -8,6 +11,15 @@
         file (:file opt)]
     (println (str "idx: " idx " \nfile: " file))))
 
+(defn add-field [document field-key field-value field-type]
+  (.add document
+        (Field. field-key field-value field-type)))
+
+;(defn create-document [fields]
+;  (let [doc (Document.)]
+;    ))
+
+;;Field$Index/ANALYZED
 
 ;;try {
 ;;     String idxPath = "some/path";
