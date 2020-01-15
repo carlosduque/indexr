@@ -1,19 +1,35 @@
 (ns indexr.app
+  (:require
+    [clojure.java.io :as io])
   (:import
-    (org.apache.lucene.analysis Analyzer)
-    (org.apache.lucene.analysis.standard StandardAnalyzer)
-    (org.apache.lucene.document Document Field StringField TextField)
-    (org.apache.lucene.search IndexSearcher Query))
+    [org.apache.lucene.analysis Analyzer]
+    [org.apache.lucene.analysis.standard StandardAnalyzer]
+    [org.apache.lucene.document Document Field Field$Store StringField TextField]
+    [org.apache.lucene.index IndexWriter IndexWriterConfig]
+    [org.apache.lucene.search IndexSearcher Query]
+    [org.apache.lucene.store Directory FSDirectory])
   (:gen-class))
 
-(defn run [opt arg]
-  (let [idx (:index opt)
-        file (:file opt)]
-    (println (str "idx: " idx " \nfile: " file))))
-
-(defn add-field [document field-key field-value field-type]
+(defn add-field [document field-key field-value]
   (.add document
-        (Field. field-key field-value field-type)))
+        (TextField. field-key field-value)))
+
+(defn add [writer file]
+  (let [document (Document.)
+        ms (System/currentTimeMillis)
+        reader (io/reader file)]
+    (with-open [reader (io/reader file)]
+      (add-field document "contents" reader))))
+
+(defn run [opt]
+  (let [idx-dir (FSDirectory/open (:index opt))
+        analyzer (StandardAnalyzer.)
+        idx-cfg (IndexWriterConfig. analyzer)
+        idx-writer (IndexWriter. idx-dir idx-cfg)
+        file (:file opt)]
+    (with-open [idx-writer (IndexWriter. idx-dir idx-cfg)]
+      (add idx-writer file))))
+
 
 ;(defn create-document [fields]
 ;  (let [doc (Document.)]

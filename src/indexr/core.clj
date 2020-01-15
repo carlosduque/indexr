@@ -23,10 +23,11 @@
   [["-h" "--help" ]
    ["-i" "--index INDEX" "Path to index"
     :default ".index/"
-    ;:parse-fn #(somefn %)
-    :validate [#(.isDirectory (io/file %)) "must be a directory"]]
+    :parse-fn #(.toPath (io/file %))
+    :validate [#(.isDirectory (.toFile %)) "must be a directory"]]
    ["-f" "--file FILE" "Path to a file that should be added to the index"
-    :validate [#(.isFile (io/file %)) "must be a regular file"]]
+    :parse-fn #(io/file %)
+    :validate [#(.isFile %) "must be a regular file"]]
    ["-q" "--query PATTERN" "The search query"
     :default "*"
     ;:parse-fn #()
@@ -39,7 +40,7 @@
       errors (exit 1 (error-msg errors))
       :else
       (try
-        (app/run options arguments)
+        (app/run options)
         (catch Exception e
           (println "Danger:" (.getMessage e))
           (exit 1 (usage summary)))))))
