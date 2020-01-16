@@ -5,7 +5,7 @@
     [org.apache.lucene.analysis Analyzer]
     [org.apache.lucene.analysis.standard StandardAnalyzer]
     [org.apache.lucene.document Document Field Field$Store StringField TextField]
-    [org.apache.lucene.index IndexWriter IndexWriterConfig]
+    [org.apache.lucene.index IndexWriter IndexWriterConfig IndexWriterConfig$OpenMode]
     [org.apache.lucene.search IndexSearcher Query]
     [org.apache.lucene.store Directory FSDirectory])
   (:gen-class))
@@ -24,12 +24,14 @@
 (defn run [opt]
   (let [idx-dir (FSDirectory/open (:index opt))
         analyzer (StandardAnalyzer.)
-        idx-cfg (IndexWriterConfig. analyzer)
+        idx-cfg (.setOpenMode (IndexWriterConfig. analyzer) IndexWriterConfig$OpenMode/CREATE_OR_APPEND)
         idx-writer (IndexWriter. idx-dir idx-cfg)
         file (:file opt)]
     (with-open [idx-writer (IndexWriter. idx-dir idx-cfg)]
       (add idx-writer file))))
 
+
+#_(-main "-i" "/Users/carlos/idx" "-f" "/Users/carlos/d1.txt")
 
 ;(defn create-document [fields]
 ;  (let [doc (Document.)]
