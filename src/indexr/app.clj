@@ -5,58 +5,41 @@
     [org.apache.lucene.analysis Analyzer]
     [org.apache.lucene.analysis.standard StandardAnalyzer]
     [org.apache.lucene.document Document Field Field$Store StringField TextField]
-    [org.apache.lucene.index IndexWriter IndexWriterConfig IndexWriterConfig$OpenMode]
-    [org.apache.lucene.search IndexSearcher Query]
+    [org.apache.lucene.index IndexWriter IndexWriterConfig IndexWriterConfig$OpenMode
+                             DirectoryReader]
+    [org.apache.lucene.queryparser.classic QueryParser]
+    [org.apache.lucene.search IndexSearcher Query ScoreDoc]
     [org.apache.lucene.store Directory FSDirectory])
   (:gen-class))
 
 (defn add-field [document field-key field-value]
-  (.add document
-        (TextField. field-key field-value)))
+  (.add document (TextField. field-key field-value)))
 
-(defn add [writer file]
-  (let [document (Document.)
-        ms (System/currentTimeMillis)
-        reader (io/reader file)]
+(defn add-document [writer file]
+  (let [document (Document.)]
     (with-open [reader (io/reader file)]
       (add-field document "contents" reader))))
 
-(defn run [opt]
-  (let [idx-dir (FSDirectory/open (:index opt))
+(defn index-file [index-path file]
+  (let [idx-dir (FSDirectory/open index-path)
         analyzer (StandardAnalyzer.)
-        idx-cfg (.setOpenMode (IndexWriterConfig. analyzer) IndexWriterConfig$OpenMode/CREATE_OR_APPEND)
-        idx-writer (IndexWriter. idx-dir idx-cfg)
-        file (:file opt)]
+        idx-cfg (.setOpenMode (IndexWriterConfig. analyzer) IndexWriterConfig$OpenMode/CREATE_OR_APPEND)]
     (with-open [idx-writer (IndexWriter. idx-dir idx-cfg)]
-      (add idx-writer file))))
+      (add-document idx-writer file))))
 
+(defn index-search [index-path fieldname criteria]
+  (let [reader (DirectoryReader/open (FSDirectory/open index-path))
+        analyzer (StandardAnalyzer.)
+        searcher (IndexSearcher. reader)
+        parser (QueryParser. fieldname analyzer)
+        query (.parse parser criteria)]
+    (.scoreDocs (.search searcher query 10))))
 
-#_(-main "-i" "/Users/carlos/idx" "-f" "/Users/carlos/d1.txt")
+(defn run [opt]
+  (index-file (:index opt) (:file opt)))
 
-;(defn create-document [fields]
-;  (let [doc (Document.)]
-;    ))
-
-;;Field$Index/ANALYZED
-
-;;try {
-;;     String idxPath = "some/path";
-;;     Directory dir = FSDirectory.open(idxPath);
-;;     Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
-;;     IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46, analyzer);
-;;     IndexWriter writer = new IndexWriter(dir, iwc);
-;;     //...add docs
-;;     String text = "thi is the text to be indexed";
-;;     Document doc = new Document();
-;;     doc.add(new Field("fieldname", text, TextField.TYPE_STORED));
-;;     writer.addDocument(doc);
-;;     //...add docs
-;;     writer.close();
-;;     } except (IOException e) {
-;;       //errorr
-;;     }
-;;}
-
+#_(run {:index (.toPath (io/file "/Users/carlos/idx")) :file (io/file "/Users/carlos/d2.txt")})
+#_(index-search (.toPath (io/file "/Users/carlos/idx")) "contents" "fish")
 
 ;;DirectoryReader reader = DirectoryReader.open(directory);
 ;;IndexSearcher searcher = new IndexSearcher(reader);

@@ -7,7 +7,7 @@
     [clojure.tools.cli :as cli]))
 
 (defn- usage [options-summary] (->> ["This is Oraqus' IndexR, use it to index your books" ""
-        "Usage: program-name -i /path/to/index -q someTerm"
+        "Usage: java -jar indexr.jar -i /path/to/index -q someTerm"
         "Options:"
         options-summary]
         (string/join \newline)))
