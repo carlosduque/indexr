@@ -33,23 +33,17 @@
         searcher (IndexSearcher. reader)
         parser (QueryParser. fieldname analyzer)
         query (.parse parser criteria)]
-    (.scoreDocs (.search searcher query 10))))
+    (.search searcher query 10)))
 
 (defn run [opt]
   (index-file (:index opt) (:file opt)))
 
-#_(run {:index (.toPath (io/file "/Users/carlos/idx")) :file (io/file "/Users/carlos/d2.txt")})
-#_(index-search (.toPath (io/file "/Users/carlos/idx")) "contents" "fish")
+#_(def idx-path (.toPath (io/file "/home/carlos/idx")))
+#_(def file1 (io/file "/home/carlos/d1.txt"))
+#_(def file2 (io/file "/home/carlos/d2.txt"))
 
-;;DirectoryReader reader = DirectoryReader.open(directory);
-;;IndexSearcher searcher = new IndexSearcher(reader);
-;;QueryParser parser = new QueryParser("fieldname", analyzer);
-;;Query query = parser.parse("text");
-;;ScoreDoc[] hits = searcher.search(query, 10).scoreDocs;
-;;for (int i=0; i < hits.length; i++) {
-;;         Document hitDoc = searcher.doc(hits[i].doc);
-;;         Sys.out.print(hitDoc.get("fieldname"));
-;;}
-;;reader.close();
-;;directory.close();
+#_(index-file idx-path file1)
+#_(index-file idx-path file2)
+#_(def results (index-search (.toPath (io/file "/home/carlos/idx")) "contents" "fish"))
 
+#_(.totalHits results)
