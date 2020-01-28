@@ -12,38 +12,35 @@
     [org.apache.lucene.store Directory FSDirectory])
   (:gen-class))
 
-#_(defn add-field [document field-key field-value]
-  (.add document (TextField. field-key field-value)))
+(defn add-field [document k v]
+  (.add document (StringField. k v Field$Store/YES)))
 
-#_(defn add-document [writer fields]
+(defn fields->doc [fields]
   (let [document (Document.)]
-    (add-field document "contents" reader)))
+    (doseq [[k v] fields]
+      (add-field document k v))))
 
-(defn index-file [index-path fields]
+(defn index-writer [index-path]
   (let [dir (FSDirectory/open index-path)
         analyzer (StandardAnalyzer.)
-        cfg (.setOpenMode (IndexWriterConfig. analyzer) IndexWriterConfig$OpenMode/CREATE_OR_APPEND)
-        fields {:file-reader (io/reader file)}]
-    (with-open [writer (IndexWriter. dir cfg)]
-      (let [document (Document.)]
-        (do
-          (println "adding fields")
-          (.add document (StringField. "k1" "fish" Field$Store/YES))
-          (.add document (StringField. "k2" "bear" Field$Store/YES))
-          (.add document (StringField. "k3" "shark" Field$Store/YES))
-          (.add document (StringField. "k4" "eagle" Field$Store/YES))
-          (.add document (StringField. "k5" "wolf" Field$Store/YES))
-          (println "all added")
-          (println "writing...")
-          (.addDocument writer document))))))
+        cfg (IndexWriterConfig. analyzer)]
+    (.setOpenMode cfg IndexWriterConfig$OpenMode/CREATE_OR_APPEND)))
+
+(defn index [index-path fields]
+  (let [millis (System/currentTimeMillis)
+        writer (index-writer index-path)]
+      (doseq [f fields]
+        (.addDocument writer (fields->doc (assoc fields :created-at millis))))))
 
 ;;;;;;;
-(def idx-path (.toPath (io/file "/Users/carlos/idx")))
+(def idx-path (.toPath (io/file "/home/carlos/idx")))
 #_(def idx-big (.toPath (io/file "/Users/carlos/index-big")))
 #_(def idx-small (.toPath (io/file "/Users/carlos/index-small")))
-(def file1 (io/file "./resources/books/d1.txt"))
-(index-file idx-path file1)
 
-(def file2 (io/file "./resources/books/d2.txt"))
-(index-file idx-path file2)
+(def book1 {:path "/home/carlos/dev/src/indexr/resources/books/d1.txt"
+            :file (io/file "./resources/books/d1.txt")})
 
+(def book2 {:path "/home/carlos/dev/src/indexr/resources/books/d2.txt"
+            :file (io/file "./resources/books/d2.txt")})
+
+(index idx-path book1)

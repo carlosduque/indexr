@@ -27,4 +27,4 @@
 #_(def results-big (index-search idx-big "contents" "fish"))
 #_(def results-small (index-search idx-small "contents" "fish"))
 #_(map #(.totalHits %) [results results-big results-small])
-(.totalHits results)
+#_(.totalHits results)
