@@ -13,7 +13,7 @@
   (:gen-class))
 
 (defn to-str [value]
-  (if keyword? value
+  (if (keyword? value)
     (name value)
     (str value)))
 
@@ -48,4 +48,4 @@
             :file (io/file "./resources/books/d2.txt")})
 
 (index idx-path book1)
-(index idx-path book2)
+#_(index idx-path book2)
