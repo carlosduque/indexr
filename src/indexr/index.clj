@@ -12,8 +12,13 @@
     [org.apache.lucene.store Directory FSDirectory])
   (:gen-class))
 
+(defn to-str [value]
+  (if keyword? value
+    (name value)
+    (str value)))
+
 (defn add-field [document k v]
-  (.add document (StringField. k v Field$Store/YES)))
+  (.add document (StringField. (to-str k) (to-str v) Field$Store/YES)))
 
 (defn fields->doc [fields]
   (let [document (Document.)]
@@ -24,13 +29,12 @@
   (let [dir (FSDirectory/open index-path)
         analyzer (StandardAnalyzer.)
         cfg (IndexWriterConfig. analyzer)]
-    (.setOpenMode cfg IndexWriterConfig$OpenMode/CREATE_OR_APPEND)))
+    (IndexWriter. dir (.setOpenMode cfg IndexWriterConfig$OpenMode/CREATE_OR_APPEND))))
 
 (defn index [index-path fields]
-  (let [millis (System/currentTimeMillis)
-        writer (index-writer index-path)]
+  (with-open [writer (index-writer index-path)]
       (doseq [f fields]
-        (.addDocument writer (fields->doc (assoc fields :created-at millis))))))
+        (.addDocument writer (fields->doc (assoc fields :created-at (System/currentTimeMillis)))))))
 
 ;;;;;;;
 (def idx-path (.toPath (io/file "/home/carlos/idx")))
@@ -44,3 +48,4 @@
             :file (io/file "./resources/books/d2.txt")})
 
 (index idx-path book1)
+(index idx-path book2)
