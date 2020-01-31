@@ -23,7 +23,8 @@
 (defn fields->doc [fields]
   (let [document (Document.)]
     (doseq [[k v] fields]
-      (add-field document k v))))
+      (add-field document k v))
+    document))
 
 (defn index-writer [index-path]
   (let [dir (FSDirectory/open index-path)
@@ -37,15 +38,15 @@
         (.addDocument writer (fields->doc (assoc fields :created-at (System/currentTimeMillis)))))))
 
 ;;;;;;;
-(def idx-path (.toPath (io/file "/home/carlos/idx")))
+#_(def idx-path (.toPath (io/file "/Users/carlos/idx")))
 #_(def idx-big (.toPath (io/file "/Users/carlos/index-big")))
 #_(def idx-small (.toPath (io/file "/Users/carlos/index-small")))
 
-(def book1 {:path "/home/carlos/dev/src/indexr/resources/books/d1.txt"
+#_(def book1 {:path "/Users/carlos/dev/src/indexr/resources/books/d1.txt"
             :file (io/file "./resources/books/d1.txt")})
 
-(def book2 {:path "/home/carlos/dev/src/indexr/resources/books/d2.txt"
+#_(def book2 {:path "/Users/carlos/dev/src/indexr/resources/books/d2.txt"
             :file (io/file "./resources/books/d2.txt")})
 
-(index idx-path book1)
+#_(index idx-path book1)
 #_(index idx-path book2)
