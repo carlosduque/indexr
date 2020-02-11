@@ -18,7 +18,9 @@
     (str value)))
 
 (defn add-field [document k v]
-  (.add document (StringField. (to-str k) (to-str v) Field$Store/YES)))
+  (if (= k :contents)
+    (.add document (TextField. (to-str k) v))
+    (.add document (StringField. (to-str k) (to-str v) Field$Store/YES))))
 
 (defn fields->doc [fields]
   (let [document (Document.)]
@@ -32,10 +34,11 @@
         cfg (IndexWriterConfig. analyzer)]
     (IndexWriter. dir (.setOpenMode cfg IndexWriterConfig$OpenMode/CREATE_OR_APPEND))))
 
-(defn index [index-path fields]
-  (with-open [writer (index-writer index-path)]
+(defn index-file [index-path fields]
+  (with-open [writer (index-writer index-path)
+              reader (io/reader (:file fields))]
       (doseq [f fields]
-        (.addDocument writer (fields->doc (assoc fields :created-at (System/currentTimeMillis)))))))
+        (.addDocument writer (fields->doc (assoc fields :contents reader))))))
 
 ;;;;;;;
 #_(def idx-path (.toPath (io/file "/Users/carlos/idx")))
@@ -43,10 +46,12 @@
 #_(def idx-small (.toPath (io/file "/Users/carlos/index-small")))
 
 #_(def book1 {:path "/Users/carlos/dev/src/indexr/resources/books/d1.txt"
-            :file (io/file "./resources/books/d1.txt")})
+            :file (io/file "./resources/books/d1.txt")
+            :created-at (System/currentTimeMillis)})
 
 #_(def book2 {:path "/Users/carlos/dev/src/indexr/resources/books/d2.txt"
-            :file (io/file "./resources/books/d2.txt")})
+            :file (io/file "./resources/books/d2.txt")
+            :created-at (System/currentTimeMillis)})
 
-#_(index idx-path book1)
-#_(index idx-path book2)
+#_(index-file idx-path book1)
+#_(index-file idx-path book2)
