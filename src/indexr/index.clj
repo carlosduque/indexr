@@ -37,19 +37,16 @@
 (defn index-file [index-path fields]
   (with-open [writer (index-writer index-path)
               reader (io/reader (:file fields))]
-      (doseq [f fields]
-        (.addDocument writer (fields->doc (assoc fields :contents reader))))))
+      (.addDocument writer (fields->doc (assoc fields :contents reader)))))
 
 ;;;;;;;
-#_(def idx-path (.toPath (io/file "/Users/carlos/idx")))
-#_(def idx-big (.toPath (io/file "/Users/carlos/index-big")))
-#_(def idx-small (.toPath (io/file "/Users/carlos/index-small")))
+#_(def idx-path (.toPath (io/file "/home/carlos/idx")))
 
-#_(def book1 {:path "/Users/carlos/dev/src/indexr/resources/books/d1.txt"
+#_(def book1 {:path "/home/carlos/dev/src/indexr/resources/books/d1.txt"
             :file (io/file "./resources/books/d1.txt")
             :created-at (System/currentTimeMillis)})
 
-#_(def book2 {:path "/Users/carlos/dev/src/indexr/resources/books/d2.txt"
+#_(def book2 {:path "/home/carlos/dev/src/indexr/resources/books/d2.txt"
             :file (io/file "./resources/books/d2.txt")
             :created-at (System/currentTimeMillis)})
 

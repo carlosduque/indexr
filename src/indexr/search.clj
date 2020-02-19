@@ -18,13 +18,7 @@
 
 ;;;;;;;
 #_(require '[clojure.java.io :as io])
-#_(def idx-path (.toPath (io/file "/Users/carlos/idx")))
-#_(def idx-big (.toPath (io/file "/Users/carlos/index-big")))
-#_(def idx-small (.toPath (io/file "/Users/carlos/index-small")))
+#_(def idx-path (.toPath (io/file "/home/carlos/idx")))
 
-#_(def results (index-search idx-path "contents" "fish"))
-#_(def results (index-search idx-path "k4" "eagle"))
-#_(def results-big (index-search idx-big "contents" "fish"))
-#_(def results-small (index-search idx-small "contents" "fish"))
-#_(map #(.totalHits %) [results results-big results-small])
+#_(def results (index-search idx-path "contents" "prisoners"))
 #_(.totalHits results)
