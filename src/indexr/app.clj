@@ -6,14 +6,21 @@
     [indexr.search :as s])
   (:gen-class))
 
-(defn create-queue
+#_(defn create-queue
   ([] (LinkedBlockingQueue.)))
 
-(defn enqueue [^LinkedBlockingQueue queue work-item]
+(defn create-queue []
+  (atom []))
+
+#_(defn enqueue [^LinkedBlockingQueue queue work-item]
   (try
     (.put queue work-item)
   (catch Exception e
-    (str "caught exception while putting to queue" (.getMessage e)))))
+    (str "caught exception while putting to queue" (.getMessage e))))
+  queue)
+
+(defn enqueue [queue work-item]
+  (swap! queue conj work-item))
 
 (defn readable-file? [f]
   (and (.canRead f) (.isFile f)))
@@ -25,23 +32,23 @@
     (doall
       (filter pred (file-seq (io/file dirpath))))))
 
-(defn create-work-item [filepath]
-  (let [file (io/file filepath)]
-    (when (and (.canRead file) (.isFile file))
-      {:path (.getCanonicalPath file)
-       :file file
-       :created-at (System/currentTimeMillis)})))
+(defn create-work-item [file]
+  {:path (.getCanonicalPath file)
+   :file file
+   :created-at (System/currentTimeMillis)})
 
 (defn enqueue-file-work-items [queue src-dir]
   (map #(enqueue queue %)
        (map create-work-item (walk src-dir readable-file?))))
 
-(defn process-files [filelist]
-  (let [agents (doall (map #(agent %) filelist))]
+(defn process-items [index items]
+  (let [agents (doall (map #(agent %) items))]
     (doseq [agent agents]
-      (send-off agent i/index-file (:index opt) (datafy agent) ))
+      (send-off agent i/index-file index @agent))
     (apply await-for 5000 agents)
     (doall (map #(deref %) agents))))
 
 (defn run [opt]
-  (enqueue-file-work-items (create-queue) (:directory opt)))
+  (let [queue (create-queue)]
+    (enqueue-file-work-items queue (:directory opt))))
+
