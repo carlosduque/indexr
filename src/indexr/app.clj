@@ -7,15 +7,29 @@
   (:gen-class))
 
 (defn run [opt]
-  (build-work-load (create-queue) (:index opt) (:file opt)))
+  (enqueue-file-work-items (create-queue) (:directory opt)))
 
 (defn create-queue
   ([] (LinkedBlockingQueue.)))
 
-(defn enqueue [^LinkedBlockingQueue queue index filepath]
-  (let [file (io/file filepath)]
-    (when (and (.canRead file) (.isFile file))
-             (.put queue (datafy file)))))
+(defn enqueue [^LinkedBlockingQueue queue work-item]
+  (try
+    (.put queue work-item)
+  (catch Exception e
+    (str "caught exception while putting to queue" (.getMessage e)))))
+
+(defn readable-file? [f]
+  (and (.canRead f) (.isFile f)))
+
+(defn walk
+  ([dirpath]
+    (walk dirpath identity))
+  ([dirpath pred]
+    (doall
+      (filter pred (file-seq (io/file dirpath))))))
+
+(enqueue-file-work-items [queue src-dir]
+  (map #(enqueue queue %) (map create-work-item (walk src-dir readable-file?)))
 
 (defn process-files [filelist]
   (let [agents (doall (map #(agent %) filelist))]
@@ -24,8 +38,10 @@
     (apply await-for 5000 agents)
     (doall (map #(deref %) agents))))
 
-(defn datafy [file]
-    {:path (.getCanonicalPath file)
-     :file file
-     :created-at (System/currentTimeMillis)})
+(defn create-work-item [filepath]
+  (let [file (io/file filepath)]
+    (when (and (.canRead file) (.isFile file))
+      {:path (.getCanonicalPath file)
+       :file file
+       :created-at (System/currentTimeMillis)})))
 

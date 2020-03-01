@@ -28,6 +28,9 @@
    ["-f" "--file FILE" "Path to a file that should be added to the index"
     :parse-fn #(io/file %)
     :validate [#(.isFile %) "must be a regular file"]]
+   ["-d" "--directory DIR" "Path to a directory that should be traversed"
+    :parse-fn #(io/file %)
+    :validate [#(.isDirectory (.toFile %)) "must be a directory file"]]
    ["-q" "--query PATTERN" "The search query"
     :default "*"
     ;:parse-fn #()
@@ -44,5 +47,4 @@
         (catch Exception e
           (println "Danger:" (.getMessage e))
           (exit 1 (usage summary)))))))
-
 
