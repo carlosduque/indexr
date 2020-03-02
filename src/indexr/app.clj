@@ -44,11 +44,14 @@
 (defn process-items [index items]
   (let [agents (doall (map #(agent %) items))]
     (doseq [agent agents]
-      (send-off agent i/index-file index @agent))
+      (send-off agent i/index-file index))
     (apply await-for 5000 agents)
     (doall (map #(deref %) agents))))
 
 (defn run [opt]
-  (let [queue (create-queue)]
-    (enqueue-file-work-items queue (:directory opt))))
+  (let [queue (create-queue)
+        src-dir (:directory opt)
+        index-dir (:index opt)]
+    (enqueue-file-work-items queue src-dir)
+    (process-items index-dir @queue)))
 

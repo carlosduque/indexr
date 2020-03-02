@@ -30,7 +30,7 @@
     :validate [#(.isFile %) "must be a regular file"]]
    ["-d" "--directory DIR" "Path to a directory that should be traversed"
     :parse-fn #(io/file %)
-    :validate [#(.isDirectory (.toFile %)) "must be a directory file"]]
+    :validate [#(.isDirectory %) "must be a directory"]]
    ["-q" "--query PATTERN" "The search query"
     :default "*"
     ;:parse-fn #()
