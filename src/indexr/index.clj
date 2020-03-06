@@ -34,9 +34,8 @@
         cfg (IndexWriterConfig. analyzer)]
     (IndexWriter. dir (.setOpenMode cfg IndexWriterConfig$OpenMode/CREATE_OR_APPEND))))
 
-(defn index-file [fields index-path]
-  (with-open [writer (index-writer index-path)
-              reader (io/reader (:file fields))]
+(defn index-file [fields writer]
+  (with-open [reader (io/reader (:file fields))]
       (.addDocument writer (fields->doc (assoc fields :contents reader)))))
 
 ;;;;;;;

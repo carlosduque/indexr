@@ -20,5 +20,5 @@
 #_(require '[clojure.java.io :as io])
 #_(def idx-path (.toPath (io/file "/Users/carlos/idx")))
 
-#_(def results (index-search idx-path "contents" "prisoners"))
+#_(def results (index-search idx-path "contents" "darcy"))
 #_(.totalHits results)

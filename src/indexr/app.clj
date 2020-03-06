@@ -42,11 +42,12 @@
        (map create-work-item (walk src-dir readable-file?))))
 
 (defn process-items [index items]
-  (let [agents (doall (map #(agent %) items))]
-    (doseq [agent agents]
-      (send-off agent i/index-file index))
-    (apply await-for 5000 agents)
-    (doall (map #(deref %) agents))))
+  (with-open [idx-writer (i/index-writer index)]
+    (let [agents (doall (map #(agent %) items))]
+      (doseq [agent agents]
+        (send-off agent i/index-file idx-writer))
+      (apply await-for 5000 agents)
+      agents)))
 
 (defn run [opt]
   (let [queue (create-queue)
@@ -55,3 +56,10 @@
     (enqueue-file-work-items queue src-dir)
     (process-items index-dir @queue)))
 
+;;;;
+#_(require '[clojure.java.io :as io])
+#_(def books (io/file "./resources/books/txt"))
+#_(def idx (io/file "/Users/carlos/idx"))
+#_(def q (create-queue))
+#_(def params {:directory books
+             :index (.toPath idx)})
