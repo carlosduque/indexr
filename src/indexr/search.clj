@@ -17,8 +17,8 @@
     (.search searcher query 10)))
 
 ;;;;;;;
-#_(require '[clojure.java.io :as io])
-#_(def idx-path (.toPath (io/file "/Users/carlos/idx")))
+(require '[clojure.java.io :as io])
+(def idx-path (.toPath (io/file "/Users/carlos/idx")))
 
-#_(def results (index-search idx-path "contents" "darcy"))
-#_(.totalHits results)
+(def results (index-search idx-path "contents" "darcy"))
+(.totalHits results)

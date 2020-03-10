@@ -4,9 +4,9 @@
   (:import
     [org.apache.lucene.analysis Analyzer]
     [org.apache.lucene.analysis.standard StandardAnalyzer]
-    [org.apache.lucene.document Document Field Field$Store StringField TextField]
+    [org.apache.lucene.document Document Field FieldType Field$Store StringField TextField]
     [org.apache.lucene.index IndexWriter IndexWriterConfig IndexWriterConfig$OpenMode
-                             DirectoryReader]
+                             DirectoryReader IndexOptions]
     [org.apache.lucene.queryparser.classic QueryParser]
     [org.apache.lucene.search IndexSearcher Query ScoreDoc]
     [org.apache.lucene.store Directory FSDirectory]
@@ -24,9 +24,10 @@
     (str value)))
 
 (defn add-field [document k v]
-  (if (= k :contents)
-    (.add document (TextField. (to-str k) v))
-    (.add document (StringField. (to-str k) (to-str v) Field$Store/YES))))
+  (let [field-type (doto (FieldType.) (.setTokenized true) (.setIndexOptions IndexOptions/DOCS))]
+    (if (= k :contents)
+      (.add document (Field. (to-str k) v field-type))
+      (.add document (StringField. (to-str k) (to-str v) Field$Store/YES)))))
 
 (defn fields->doc [fields]
   (let [document (Document.)]
@@ -39,10 +40,6 @@
         analyzer (StandardAnalyzer.)
         cfg (IndexWriterConfig. analyzer)]
     (IndexWriter. dir (.setOpenMode cfg IndexWriterConfig$OpenMode/CREATE_OR_APPEND))))
-
-(defn index-file [fields writer]
-  (with-open [reader (io/reader (:file fields))]
-      (.addDocument writer (fields->doc (assoc fields :contents reader)))))
 
 (defn extract-contents [file]
   (let [metadata (Metadata.)
@@ -58,6 +55,11 @@
           (println "general exception:" (.getMessage e)))))
     (.toString handler)))
 
+(defn index-file [fields writer]
+  (.addDocument writer
+                (fields->doc (assoc fields :contents
+                                    (extract-contents (:file fields))))))
+
 ;;;;;;;
 (def idx-path (.toPath (io/file "/Users/carlos/idx")))
 
@@ -65,17 +67,20 @@
             :file (io/file "./resources/books/txt/d1.txt")
             :created-at (System/currentTimeMillis)})
 
-(def aladdin-pdf {:path "/home/carlos/dev/src/indexr/resources/books/aladdin.pdf"
+(def aladdin-pdf {:path "/Users/carlos/dev/src/indexr/resources/books/aladdin.pdf"
             :file (io/file "./resources/books/aladdin.pdf")
             :created-at (System/currentTimeMillis)})
 
-(def sicp-pdf {:path "/home/carlos/dev/src/indexr/resources/books/sicp.pdf"
+#_(def sicp-pdf {:path "/home/carlos/dev/src/indexr/resources/books/sicp.pdf"
             :file (io/file "./resources/books/sicp.pdf")
             :created-at (System/currentTimeMillis)})
 #_(def an-epub {:path "/home/carlos/dev/src/indexr/resources/books/epub/les-miserables.epub"
             :file (io/file "./resources/books/epub/les-miserables.epub")
             :created-at (System/currentTimeMillis)})
 
-#_(index-file idx-path a-pdf)
+(defn test-index-pdf []
+  (with-open [w (index-writer idx-path)]
+    (index-file aladdin-pdf w)))
+
 
 

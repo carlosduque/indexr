@@ -32,9 +32,7 @@
     :parse-fn #(io/file %)
     :validate [#(.isDirectory %) "must be a directory"]]
    ["-q" "--query PATTERN" "The search query"
-    :default "*"
-    ;:parse-fn #()
-    ]])
+    :default "*"]])
 
 (defn -main [& args]
   (let [{:keys [options arguments errors summary]} (cli/parse-opts args cli-options)]

@@ -58,8 +58,11 @@
 
 ;;;;
 #_(require '[clojure.java.io :as io])
-#_(def books (io/file "./resources/books/txt"))
+#_(def books (io/file "./resources/books"))
 #_(def idx (io/file "/Users/carlos/idx"))
 #_(def q (create-queue))
 #_(def params {:directory books
              :index (.toPath idx)})
+
+;;Tika
+;;https://github.com/rickcrawford/lucene-example/blob/master/src/main/java/WriteIndex.java

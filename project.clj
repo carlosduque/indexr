@@ -6,7 +6,8 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/tools.cli "0.4.2"]
                  [org.apache.lucene/lucene-core "8.4.0"]
-                 [org.apache.lucene/lucene-queryparser "8.4.0"]]
+                 [org.apache.lucene/lucene-queryparser "8.4.0"]
+                 [org.apache.tika/tika-parsers "1.23"]]
   :main ^:skip-aot indexr.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
