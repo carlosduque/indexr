@@ -59,7 +59,7 @@
 ;;;;
 #_(require '[clojure.java.io :as io])
 #_(def books (io/file "./resources/books"))
-#_(def idx (io/file "/Users/carlos/idx"))
+#_(def idx (io/file "/home/carlos/idx"))
 #_(def q (create-queue))
 #_(def params {:directory books
              :index (.toPath idx)})
