@@ -8,16 +8,36 @@
     [org.apache.lucene.store Directory FSDirectory])
   (:gen-class))
 
-(defn index-search [index-path fieldname criteria]
+#_(defn index-search [index-path limit fieldname criteria]
   (let [reader (DirectoryReader/open (FSDirectory/open index-path))
         analyzer (StandardAnalyzer.)
         searcher (IndexSearcher. reader)
         parser (QueryParser. fieldname analyzer)
         query (.parse parser criteria)]
-    (.search searcher query 10)))
+    (.search searcher query limit)))
+
+(defn index-search-doc [index-path number]
+  (let [reader (DirectoryReader/open (FSDirectory/open index-path))
+        searcher (IndexSearcher. reader)]
+    (.doc searcher number)))
+
+(defn index-search [index-path limit fieldname criteria]
+  (let [reader   (DirectoryReader/open (FSDirectory/open index-path))
+        analyzer (StandardAnalyzer.)
+        searcher (IndexSearcher. reader)
+        parser   (QueryParser. fieldname analyzer)
+        query    (.parse parser criteria)
+        hits     (.search searcher query (int limit))
+        total    (count (.scoreDocs hits))]
+    (doall
+      (for [hit (map (partial aget (.scoreDocs hits)) (range 0 total))]
+        (index-search doc index-path (.doc hit))))))
 
 ;;;;;;;
 #_(require '[clojure.java.io :as io])
 #_(def idx-path (.toPath (io/file "/home/carlos/idx")))
-#_(def hits (index-search idx-path "contents" "aladdin"))
+#_(def hits (index-search idx-path 10 "contents" "aladdin"))
 #_(.totalHits hits)
+
+#_(map #(index-search-doc idx-path %) (range 0 (count (.scoreDocs (index-search idx-path "contents" "aladdin")))))
+
