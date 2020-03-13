@@ -21,6 +21,10 @@
         searcher (IndexSearcher. reader)]
     (.doc searcher number)))
 
+(defn doc->map [document]
+  {:path (.get document "path")
+   :created-at (.get document "created-at")})
+
 (defn index-search [index-path limit fieldname criteria]
   (let [reader   (DirectoryReader/open (FSDirectory/open index-path))
         analyzer (StandardAnalyzer.)
@@ -31,13 +35,14 @@
         total    (count (.scoreDocs hits))]
     (doall
       (for [hit (map (partial aget (.scoreDocs hits)) (range 0 total))]
-        (index-search doc index-path (.doc hit))))))
+        {:id (.doc hit)
+         :score (.score hit)
+         :document (doc->map (index-search-doc index-path (.doc hit)))}))))
 
 ;;;;;;;
-#_(require '[clojure.java.io :as io])
-#_(def idx-path (.toPath (io/file "/home/carlos/idx")))
-#_(def hits (index-search idx-path 10 "contents" "aladdin"))
-#_(.totalHits hits)
+(require '[clojure.java.io :as io])
+(def idx-path (.toPath (io/file "/Users/carlos/idx")))
+(def hits (index-search idx-path 10 "contents" "man"))
 
 #_(map #(index-search-doc idx-path %) (range 0 (count (.scoreDocs (index-search idx-path "contents" "aladdin")))))
 
