@@ -8,41 +8,44 @@
     [org.apache.lucene.store Directory FSDirectory])
   (:gen-class))
 
-#_(defn index-search [index-path limit fieldname criteria]
-  (let [reader (DirectoryReader/open (FSDirectory/open index-path))
-        analyzer (StandardAnalyzer.)
-        searcher (IndexSearcher. reader)
-        parser (QueryParser. fieldname analyzer)
-        query (.parse parser criteria)]
-    (.search searcher query limit)))
-
-(defn index-search-doc [index-path number]
-  (let [reader (DirectoryReader/open (FSDirectory/open index-path))
-        searcher (IndexSearcher. reader)]
-    (.doc searcher number)))
-
 (defn doc->map [document]
   {:path (.get document "path")
    :created-at (.get document "created-at")})
 
-(defn index-search [index-path limit fieldname criteria]
-  (let [reader   (DirectoryReader/open (FSDirectory/open index-path))
-        analyzer (StandardAnalyzer.)
+(defn search-doc [index-path number]
+  (let [reader (DirectoryReader/open (FSDirectory/open index-path))
+        searcher (IndexSearcher. reader)]
+    (.doc searcher number)))
+
+#_(defn search [idx-path limit fieldname criteria]
+  (let [reader   (DirectoryReader/open (FSDirectory/open idx-path))
         searcher (IndexSearcher. reader)
-        parser   (QueryParser. fieldname analyzer)
+        parser   (QueryParser. fieldname (StandardAnalyzer.))
         query    (.parse parser criteria)
         hits     (.search searcher query (int limit))
-        total    (count (.scoreDocs hits))]
+        total-hits (count (.scoreDocs hits))]
     (doall
-      (for [hit (map (partial aget (.scoreDocs hits)) (range 0 total))]
+      (for [hit (map (partial aget (.scoreDocs hits)) (range 0 total-hits))]
         {:id (.doc hit)
          :score (.score hit)
-         :document (doc->map (index-search-doc index-path (.doc hit)))}))))
+         :document (doc->map (search-doc idx-path (.doc hit)))}))))
+
+(defn search [idx-path limit fieldname criteria]
+  (let [reader   (DirectoryReader/open (FSDirectory/open idx-path))
+        searcher (IndexSearcher. reader)
+        parser   (QueryParser. fieldname (StandardAnalyzer.))
+        query    (.parse parser criteria)
+        hits     (.search searcher query (int limit))
+        total-hits (count (.scoreDocs hits))]
+    (vec
+      (for [hit (map (partial aget (.scoreDocs hits)) (range 0 total-hits))]
+        {:id (.doc hit)
+         :score (.score hit)
+         :document (doc->map (search-doc idx-path (.doc hit)))}))))
 
 ;;;;;;;
-(require '[clojure.java.io :as io])
-(def idx-path (.toPath (io/file "/Users/carlos/idx")))
-(def hits (index-search idx-path 10 "contents" "man"))
-
-#_(map #(index-search-doc idx-path %) (range 0 (count (.scoreDocs (index-search idx-path "contents" "aladdin")))))
+#_(require '[clojure.java.io :as io])
+#_(use 'clojure.pprint)
+#_(def idx-path (.toPath (io/file "/Users/carlos/idx")))
+#_(def hits (search idx-path 10 "contents" "man"))
 
