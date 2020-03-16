@@ -43,9 +43,3 @@
          :score (.score hit)
          :document (doc->map (search-doc idx-path (.doc hit)))}))))
 
-;;;;;;;
-#_(require '[clojure.java.io :as io])
-#_(use 'clojure.pprint)
-#_(def idx-path (.toPath (io/file "/Users/carlos/idx")))
-#_(def hits (search idx-path 10 "contents" "man"))
-

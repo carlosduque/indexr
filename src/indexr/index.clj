@@ -60,21 +60,3 @@
                 (fields->doc (assoc fields :contents
                                     (extract-contents (:file fields))))))
 
-;;;;;;;
-#_(def idx-path (.toPath (io/file "/Users/carlos/idx")))
-#_(def a-txt {:path "/home/carlos/dev/src/indexr/resources/books/txt/d1.txt"
-            :file (io/file "./resources/books/txt/d1.txt")
-            :created-at (System/currentTimeMillis)})
-#_(def aladdin-pdf {:path "/Users/carlos/dev/src/indexr/resources/books/aladdin.pdf"
-            :file (io/file "./resources/books/aladdin.pdf")
-            :created-at (System/currentTimeMillis)})
-#_(def sicp-pdf {:path "/home/carlos/dev/src/indexr/resources/books/sicp.pdf"
-            :file (io/file "./resources/books/sicp.pdf")
-            :created-at (System/currentTimeMillis)})
-#_(def an-epub {:path "/home/carlos/dev/src/indexr/resources/books/epub/les-miserables.epub"
-            :file (io/file "./resources/books/epub/les-miserables.epub")
-            :created-at (System/currentTimeMillis)})
-#_(defn test-index-pdf [data]
-  (with-open [w (index-writer idx-path)]
-    (index-file data w)))
-

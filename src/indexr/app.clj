@@ -47,20 +47,23 @@
       (doseq [agent agents]
         (send-off agent i/index-file idx-writer))
       (apply await-for 5000 agents)
-      agents)))
+      (map deref agents))))
 
-(defn run [opt]
-  (let [queue     (create-queue)
-        src-dir   (:directory opt)
-        index-dir (:index opt)]
-    (enqueue-file-work-items queue src-dir)
+(defn launch-indexer [opt queue]
+  (let [src-dir   (:directory opt)
+        index-dir (:index opt)
+        items (enqueue-file-work-items queue src-dir)]
+    (println "count: " (count items))
     (process-items index-dir @queue)))
 
 ;;;;
 #_(require '[clojure.java.io :as io])
+#_(use 'clojure.pprint)
 #_(def books (io/file "./resources/books"))
 #_(def idx (io/file "/Users/carlos/idx"))
 #_(def q (create-queue))
 #_(def params {:directory books
              :index (.toPath idx)})
+#_(def ags (launch-indexer params q))
+#_(def hits (s/search (:index params) 10 "contents" "lisp"))
 
