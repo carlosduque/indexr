@@ -41,7 +41,7 @@
       errors (exit 1 (error-msg errors))
       :else
       (try
-        (app/run options)
+        (app/launch-indexer options)
         (catch Exception e
           (println "Danger:" (.getMessage e))
           (exit 1 (usage summary)))))))
